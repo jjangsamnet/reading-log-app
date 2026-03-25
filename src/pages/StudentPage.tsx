@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
 import { getStudentClasses, findClassByCode, joinClass } from '../services/classService';
-import { requestTeacherRole } from '../services/authService';
+import { requestTeacherRole, signInWithGoogle, getUserProfile } from '../services/authService';
 import { ClassData } from '../types';
 import Header from '../components/common/Header';
 import StudentDashboard from '../components/dashboard/StudentDashboard';
 import LoadingSpinner from '../components/common/LoadingSpinner';
-import { BookOpen, LogIn, Users, Loader2, GraduationCap } from 'lucide-react';
+import { BookOpen, LogIn, Users, Loader2, GraduationCap, RefreshCw, X, UserCircle } from 'lucide-react';
 
 export default function StudentPage() {
   const { user, setUser } = useAuthStore();
@@ -18,6 +18,9 @@ export default function StudentPage() {
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState('');
   const [showDashboard, setShowDashboard] = useState(true);
+  const [showAccountConfirm, setShowAccountConfirm] = useState(false);
+  const [pendingClassData, setPendingClassData] = useState<ClassData | null>(null);
+  const [switchingAccount, setSwitchingAccount] = useState(false);
 
   useEffect(() => {
     if (user) loadClasses();
@@ -41,14 +44,56 @@ export default function StudentPage() {
         setError('유효하지 않은 반 코드입니다.');
         return;
       }
-      await joinClass(classData.classId, user.uid, user.displayName, user.photoURL);
-      setJoinCode('');
-      loadClasses();
+      // 반을 찾으면 계정 확인 모달을 표시
+      setPendingClassData(classData);
+      setShowAccountConfirm(true);
     } catch (err: any) {
       setError(err.message || '반 참여에 실패했습니다.');
     } finally {
       setJoining(false);
     }
+  };
+
+  // 계정 확인 후 반에 참여
+  const handleConfirmJoin = async () => {
+    if (!user || !pendingClassData) return;
+    setJoining(true);
+    try {
+      await joinClass(pendingClassData.classId, user.uid, user.displayName, user.photoURL);
+      setJoinCode('');
+      setShowAccountConfirm(false);
+      setPendingClassData(null);
+      loadClasses();
+    } catch (err: any) {
+      setError(err.message || '반 참여에 실패했습니다.');
+      setShowAccountConfirm(false);
+    } finally {
+      setJoining(false);
+    }
+  };
+
+  // 다른 계정으로 전환
+  const handleSwitchAccount = async () => {
+    setSwitchingAccount(true);
+    try {
+      const newUser = await signInWithGoogle();
+      const profile = await getUserProfile(newUser.uid);
+      if (profile) {
+        setUser(profile);
+      }
+    } catch (err: any) {
+      if (err.code !== 'auth/popup-closed-by-user') {
+        setError('계정 전환에 실패했습니다.');
+      }
+    } finally {
+      setSwitchingAccount(false);
+    }
+  };
+
+  // 계정 확인 모달 닫기
+  const handleCancelJoin = () => {
+    setShowAccountConfirm(false);
+    setPendingClassData(null);
   };
 
   const handleRequestTeacher = async () => {
@@ -77,7 +122,7 @@ export default function StudentPage() {
               showDashboard ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border'
             }`}
           >
-            내 독서 현황
+            내 독섞 현황
           </button>
           <button
             onClick={() => setShowDashboard(false)}
@@ -100,7 +145,7 @@ export default function StudentPage() {
           )}
         </div>
 
-        {/* 내 독서 현황 (대시보드) */}
+        {/* 내 독섞 현황 (대시보드) */}
         {showDashboard && (
           <StudentDashboard studentId={user.uid} studentName={user.displayName} />
         )}
@@ -169,6 +214,77 @@ export default function StudentPage() {
           </>
         )}
       </div>
+
+      {/* 계정 확인 모달 */}
+      {showAccountConfirm && pendingClassData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800">반 참여 확인</h2>
+              <button onClick={handleCancelJoin} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* 반 정보 */}
+            <div className="bg-indigo-50 rounded-xl p-4 mb-4">
+              <p className="text-sm text-gray-500 mb-1">참여할 반</p>
+              <p className="font-bold text-lg text-indigo-700">{pendingClassData.className}</p>
+              <p className="text-sm text-gray-500">{pendingClassData.teacherName} 선생님 · {pendingClassData.students.length}명 참여 중</p>
+            </div>
+
+            {/* 현재 계정 정보 */}
+            <div className="border rounded-xl p-4 mb-4">
+              <p className="text-sm text-gray-500 mb-3">현재 로그인 계정</p>
+              <div className="flex items-center gap-3">
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="" className="w-10 h-10 rounded-full" />
+                ) : (
+                  <UserCircle className="w-10 h-10 text-gray-300" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-gray-800 truncate">{user?.displayName}</p>
+                  <p className="text-sm text-gray-500 truncate">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={handleSwitchAccount}
+                disabled={switchingAccount}
+                className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+              >
+                {switchingAccount ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                다른 계정으로 변경
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-400 mb-4 text-center">
+              위 계정으로 반에 참여합니다. 다른 계정을 사용하려면 먼저 계정을 변경하세요.
+            </p>
+
+            {/* 확인/취소 버튼 */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelJoin}
+                className="flex-1 px-4 py-3 border rounded-xl text-gray-600 font-semibold text-sm hover:bg-gray-50"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmJoin}
+                disabled={joining}
+                className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl font-semibold text-sm hover:bg-indigo-700 disabled:bg-gray-300 flex items-center justify-center gap-2"
+              >
+                {joining ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4" />}
+                이 계정으로 참여하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
