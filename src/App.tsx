@@ -55,9 +55,10 @@ function AppContent() {
 }
 
 export default function App() {
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
-  );
+    const basename = import.meta.env.BASE_URL;
+    return (
+          <BrowserRouter basename={basename}>
+                  <AppContent />
+          </BrowserRouter>BrowserRouter>
+        );
 }
