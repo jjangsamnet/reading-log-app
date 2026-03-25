@@ -13,22 +13,35 @@ export default function LogDetailPage() {
   const navigate = useNavigate();
   const [log, setLog] = useState<ReadingLog | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    loadLog();
+    if (logId) loadLog();
   }, [logId]);
 
   const loadLog = async () => {
+    if (!logId) return;
     setLoading(true);
-    const data = await getLogDetail(logId!);
-    setLog(data);
-    setLoading(false);
+    try {
+      const data = await getLogDetail(logId);
+      setLog(data);
+    } catch (err) {
+      console.error('독서록 로드 실패:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async () => {
-    if (!log) return;
-    await deleteReadingLog(log.logId, log.classId, log.studentId);
-    navigate(`/class/${classId}/student/${log.studentId}`);
+    if (!log || deleting) return;
+    setDeleting(true);
+    try {
+      await deleteReadingLog(log.logId, log.classId, log.studentId);
+      navigate(`/class/${classId}/student/${log.studentId}`);
+    } catch (err) {
+      console.error('삭제 실패:', err);
+      setDeleting(false);
+    }
   };
 
   if (loading) return <><Header /><LoadingSpinner /></>;

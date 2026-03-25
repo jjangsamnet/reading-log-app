@@ -22,18 +22,24 @@ export default function StudentBoardPage() {
   const student = classData?.students.find((s) => s.uid === studentId);
 
   useEffect(() => {
-    loadData();
+    if (classId && studentId) loadData();
   }, [classId, studentId]);
 
   const loadData = async () => {
+    if (!classId || !studentId) return;
     setLoading(true);
-    const [cls, studentLogs] = await Promise.all([
-      getClassData(classId!),
-      getStudentLogs(studentId!, classId!),
-    ]);
-    setClassData(cls);
-    setLogs(studentLogs);
-    setLoading(false);
+    try {
+      const [cls, studentLogs] = await Promise.all([
+        getClassData(classId),
+        getStudentLogs(studentId, classId),
+      ]);
+      setClassData(cls);
+      setLogs(studentLogs);
+    } catch (err) {
+      console.error('데이터 로드 실패:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <><Header /><LoadingSpinner /></>;

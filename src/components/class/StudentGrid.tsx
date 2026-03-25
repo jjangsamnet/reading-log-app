@@ -40,7 +40,7 @@ export default function StudentGrid({ classData, currentUserId }: StudentGridPro
 
             return (
               <button
-                key={idx}
+                key={`student-${student.uid}`}
                 onClick={() => handleStudentClick(student)}
                 className={`
                   relative aspect-square rounded-xl p-2 flex flex-col items-center justify-center
@@ -93,7 +93,7 @@ export default function StudentGrid({ classData, currentUserId }: StudentGridPro
           // 빈 자리
           return (
             <div
-              key={idx}
+              key={`empty-${row}-${col}`}
               className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center bg-gray-50"
             >
               <span className="text-gray-300 text-xs">빈 자리</span>

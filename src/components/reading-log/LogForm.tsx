@@ -7,9 +7,10 @@ interface LogFormProps {
   initialData?: Partial<ReadingLogInput>;
   onSubmit: (data: ReadingLogInput, coverFile?: File) => Promise<void>;
   isEdit?: boolean;
+  disabled?: boolean;
 }
 
-export default function LogForm({ initialData, onSubmit, isEdit = false }: LogFormProps) {
+export default function LogForm({ initialData, onSubmit, isEdit = false, disabled = false }: LogFormProps) {
   const [bookTitle, setBookTitle] = useState(initialData?.bookTitle || '');
   const [bookAuthor, setBookAuthor] = useState(initialData?.bookAuthor || '');
   const [readDate, setReadDate] = useState(
@@ -216,7 +217,7 @@ export default function LogForm({ initialData, onSubmit, isEdit = false }: LogFo
       {/* 제출 버튼 */}
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || disabled}
         className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold text-base
           hover:bg-indigo-700 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2"
       >

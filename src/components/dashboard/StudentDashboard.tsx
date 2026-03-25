@@ -41,16 +41,37 @@ export default function StudentDashboard({ studentId, studentName }: StudentDash
     return logs.filter((l) => l.createdAt >= monthStart.getTime()).length;
   }, [logs]);
 
-  // 연속 독서일
+  // 연속 독서 주간 (매주 1편 이상 작성한 연속 주 수)
   const streak = useMemo(() => {
     if (logs.length === 0) return 0;
-    const dates = [...new Set(logs.map((l) => formatDate(l.readDate)))].sort().reverse();
+
+    // 각 독서록을 주 단위로 그룹핑 (ISO 주 기준)
+    const getWeekKey = (timestamp: number) => {
+      const d = new Date(timestamp);
+      // 해당 주의 월요일 구하기
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+    };
+
+    const weekSet = new Set(logs.map((l) => getWeekKey(l.readDate)));
+    const sortedWeeks = [...weekSet].sort().reverse();
+
+    // 현재 주부터 연속으로 작성한 주 수 카운트
+    const now = new Date();
+    const currentWeek = getWeekKey(now.getTime());
+    const lastWeek = getWeekKey(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // 현재 주 또는 지난 주에 작성이 있어야 스트릭 시작
+    if (sortedWeeks[0] !== currentWeek && sortedWeeks[0] !== lastWeek) return 0;
+
     let count = 1;
-    for (let i = 1; i < dates.length; i++) {
-      const prev = new Date(dates[i - 1].replace(/\./g, '-'));
-      const curr = new Date(dates[i].replace(/\./g, '-'));
-      const diffDays = (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
-      if (diffDays <= 7) count++;
+    for (let i = 1; i < sortedWeeks.length; i++) {
+      const prevMonday = new Date(sortedWeeks[i - 1]);
+      const currMonday = new Date(sortedWeeks[i]);
+      const diffDays = (prevMonday.getTime() - currMonday.getTime()) / (1000 * 60 * 60 * 24);
+      if (Math.abs(diffDays - 7) <= 1) count++; // 정확히 1주 차이 (±1일 허용)
       else break;
     }
     return count;

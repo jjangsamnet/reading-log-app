@@ -121,7 +121,10 @@ export default function TeacherDashboard({ classData }: TeacherDashboardProps) {
   // 별점 분포
   const ratingDist = useMemo(() => {
     const dist = [0, 0, 0, 0, 0];
-    logs.forEach((l) => dist[l.rating - 1]++);
+    logs.forEach((l) => {
+      const idx = l.rating - 1;
+      if (idx >= 0 && idx < 5) dist[idx]++;
+    });
     return dist;
   }, [logs]);
 

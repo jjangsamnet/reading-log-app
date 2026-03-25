@@ -49,13 +49,23 @@ export default function AdminPage() {
   };
 
   const handleApprove = async (uid: string) => {
-    await approveTeacherRole(uid);
-    loadData();
+    try {
+      await approveTeacherRole(uid);
+      loadData();
+    } catch (err) {
+      console.error('교사 승인 실패:', err);
+      alert('승인 처리에 실패했습니다.');
+    }
   };
 
   const handleReject = async (uid: string) => {
-    await rejectTeacherRole(uid);
-    loadData();
+    try {
+      await rejectTeacherRole(uid);
+      loadData();
+    } catch (err) {
+      console.error('교사 거절 실패:', err);
+      alert('거절 처리에 실패했습니다.');
+    }
   };
 
   if (loading) return <><Header /><LoadingSpinner /></>;

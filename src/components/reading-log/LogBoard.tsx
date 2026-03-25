@@ -47,6 +47,11 @@ export default function LogBoard({ logs, classId, studentId, isOwner }: LogBoard
             아직 작성된 독서록이 없습니다.
           </div>
         )}
+        {logs.length === 0 && isOwner && (
+          <div className="col-span-full text-center py-10 text-gray-400">
+            첫 번째 독서록을 작성해보세요! 📖
+          </div>
+        )}
       </div>
     </div>
   );

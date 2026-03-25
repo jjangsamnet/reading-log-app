@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithGoogle } from '../services/authService';
 import { getUserProfile } from '../services/authService';
@@ -13,12 +13,14 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // 이미 로그인된 경우 리다이렉트
-  if (user) {
-    if (user.role === 'admin') navigate('/admin');
-    else if (user.role === 'teacher') navigate('/teacher');
-    else navigate('/student');
-  }
+  // 이미 로그인된 경우 리다이렉트 (useEffect로 안전하게 처리)
+  useEffect(() => {
+    if (user) {
+      if (user.role === 'admin') navigate('/admin', { replace: true });
+      else if (user.role === 'teacher') navigate('/teacher', { replace: true });
+      else navigate('/student', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleGoogleLogin = async () => {
     setLoading(true);
