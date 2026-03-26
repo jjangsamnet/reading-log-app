@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 
 interface LogBoardProps {
   logs: ReadingLog[];
-  classId: string;
+  classId: string
   studentId: string;
   isOwner: boolean; // 본인의 보드인지
 }
@@ -49,7 +49,7 @@ export default function LogBoard({ logs, classId, studentId, isOwner }: LogBoard
         )}
         {logs.length === 0 && isOwner && (
           <div className="col-span-full text-center py-10 text-gray-400">
-            첫 번째 독서록을 작성해보세요! 📖
+            첫 번째 독서록을 작성해보세요!
           </div>
         )}
       </div>
