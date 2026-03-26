@@ -159,7 +159,7 @@ export default function TeacherDashboard({ classData }: TeacherDashboardProps) {
             <Calendar className="w-4 h-4 text-indigo-500" />
             이번 주 활동
           </div>
-          <div className="text-3xl font-bold text-indigo-600">{stats.activeThisWeek}명</div>
+          <div className="text-3xl fontbold text-indigo-600">{stats.activeThisWeek}명</div>
           <p className="text-xs text-gray-400 mt-1">최근 7일 독서록 작성 학생</p>
         </div>
         <div className="bg-white rounded-xl border border-gray-200 p-5">
@@ -215,7 +215,7 @@ export default function TeacherDashboard({ classData }: TeacherDashboardProps) {
         {/* 별점 분포 */}
         <div className="bg-white rounded-xl border border-gray-200 p-5">
           <h3 className="flex items-center gap-2 font-bold text-gray-700 mb-4">
-            ⭐ 별점 분포
+            별점 분포
           </h3>
           <div className="space-y-3">
             {[5, 4, 3, 2, 1].map((star) => (
