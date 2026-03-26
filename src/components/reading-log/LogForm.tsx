@@ -27,6 +27,7 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState(initialData?.coverImage || '');
   const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,8 +42,10 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!bookTitle || !bookAuthor || !rating || !summary || !impressiveScene || !thoughts) {
-      alert('필수 항목을 모두 작성해주세요.');
+    setErrorMessage('');
+
+    if (!bookTitle.trim() || !bookAuthor.trim() || !rating || !summary.trim() || !impressiveScene.trim() || !thoughts.trim()) {
+      setErrorMessage('íì í­ëª©ì ëª¨ë ìì±í´ì£¼ì¸ì.');
       return;
     }
 
@@ -50,18 +53,21 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
     try {
       await onSubmit(
         {
-          bookTitle,
-          bookAuthor,
+          bookTitle: bookTitle.trim(),
+          bookAuthor: bookAuthor.trim(),
           readDate: new Date(readDate).getTime(),
           rating,
-          summary,
-          impressiveScene,
-          favoriteQuote,
-          thoughts,
-          recommendation,
+          summary: summary.trim(),
+          impressiveScene: impressiveScene.trim(),
+          favoriteQuote: favoriteQuote.trim(),
+          thoughts: thoughts.trim(),
+          recommendation: recommendation.trim(),
         },
         coverFile || undefined
       );
+    } catch (err) {
+      console.error('ëìë¡ ì ì¥ ì¤í¨:', err);
+      setErrorMessage('ì ì¥ì ì¤í¨íì´ì. ë¤ì ìëí´ì£¼ì¸ì.');
     } finally {
       setSubmitting(false);
     }
@@ -72,39 +78,39 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
-      {/* 책 제목 */}
+      {/* ì± ì ëª© */}
       <div>
         <label className={labelClass}>
-          📕 책 제목 <span className="text-red-500">*</span>
+          ð ì± ì ëª© <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
           value={bookTitle}
           onChange={(e) => setBookTitle(e.target.value)}
-          placeholder="예: 어린왕자"
+          placeholder="ì: ì´ë¦°ìì"
           className={inputClass}
           required
         />
       </div>
 
-      {/* 저자 + 읽은 날짜 */}
+      {/* ì ì + ì½ì ë ì§ */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>
-            ✍️ 저자 <span className="text-red-500">*</span>
+            âï¸ ì ì <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={bookAuthor}
             onChange={(e) => setBookAuthor(e.target.value)}
-            placeholder="예: 생텍쥐페리"
+            placeholder="ì: ìíì¥íë¦¬"
             className={inputClass}
             required
           />
         </div>
         <div>
           <label className={labelClass}>
-            📅 읽은 날짜 <span className="text-red-500">*</span>
+            ð ì½ì ë ì§ <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -116,20 +122,20 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
         </div>
       </div>
 
-      {/* 책 표지 사진 */}
+      {/* ì± íì§ ì¬ì§ */}
       <div>
-        <label className={labelClass}>🖼️ 책 표지 사진</label>
+        <label className={labelClass}>ð¼ï¸ ì± íì§ ì¬ì§</label>
         <div
           onClick={() => fileInputRef.current?.click()}
           className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer
             hover:border-indigo-400 hover:bg-indigo-50/50 transition-all"
         >
           {coverPreview ? (
-            <img src={coverPreview} alt="표지" className="max-h-40 mx-auto rounded-lg" />
+            <img src={coverPreview} alt="íì§" className="max-h-40 mx-auto rounded-lg" />
           ) : (
             <div className="flex flex-col items-center gap-2 text-gray-400">
               <Camera className="w-8 h-8" />
-              <span className="text-sm">클릭하여 사진을 올려주세요</span>
+              <span className="text-sm">í´ë¦­íì¬ ì¬ì§ì ì¬ë ¤ì£¼ì¸ì</span>
             </div>
           )}
         </div>
@@ -142,79 +148,86 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
         />
       </div>
 
-      {/* 별점 */}
+      {/* ë³ì  */}
       <div>
         <label className={labelClass}>
-          ⭐ 별점 <span className="text-red-500">*</span>
+          â­ ë³ì  <span className="text-red-500">*</span>
         </label>
         <StarRating rating={rating} onChange={setRating} size="lg" />
       </div>
 
-      {/* 줄거리 요약 */}
+      {/* ì¤ê±°ë¦¬ ìì½ */}
       <div>
         <label className={labelClass}>
-          📝 줄거리 요약 <span className="text-red-500">*</span>
+          ð ì¤ê±°ë¦¬ ìì½ <span className="text-red-500">*</span>
         </label>
         <textarea
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
-          placeholder="이 책은 어떤 이야기인가요? 간단히 적어보세요."
+          placeholder="ì´ ì±ì ì´ë¤ ì´ì¼ê¸°ì¸ê°ì? ê°ë¨í ì ì´ë³´ì¸ì."
           className={`${inputClass} min-h-[100px] resize-none`}
           required
         />
       </div>
 
-      {/* 인상 깊은 장면 */}
+      {/* ì¸ì ê¹ì ì¥ë©´ */}
       <div>
         <label className={labelClass}>
-          🌟 인상 깊은 장면 <span className="text-red-500">*</span>
+          ð ì¸ì ê¹ì ì¥ë©´ <span className="text-red-500">*</span>
         </label>
         <textarea
           value={impressiveScene}
           onChange={(e) => setImpressiveScene(e.target.value)}
-          placeholder="가장 기억에 남는 장면을 적어보세요."
+          placeholder="ê°ì¥ ê¸°ìµì ë¨ë ì¥ë©´ì ì ì´ë³´ì¸ì."
           className={`${inputClass} min-h-[100px] resize-none`}
           required
         />
       </div>
 
-      {/* 좋아하는 구절 */}
+      {/* ì¢ìíë êµ¬ì  */}
       <div>
-        <label className={labelClass}>💬 좋아하는 구절</label>
+        <label className={labelClass}>ð¬ ì¢ìíë êµ¬ì </label>
         <textarea
           value={favoriteQuote}
           onChange={(e) => setFavoriteQuote(e.target.value)}
-          placeholder="마음에 드는 문장을 적어보세요."
+          placeholder="ë§ìì ëë ë¬¸ì¥ì ì ì´ë³´ì¸ì."
           className={`${inputClass} min-h-[80px] resize-none`}
         />
       </div>
 
-      {/* 나의 생각 */}
+      {/* ëì ìê° */}
       <div>
         <label className={labelClass}>
-          💭 나의 생각 <span className="text-red-500">*</span>
+          ð­ ëì ìê° <span className="text-red-500">*</span>
         </label>
         <textarea
           value={thoughts}
           onChange={(e) => setThoughts(e.target.value)}
-          placeholder="이 책을 읽고 어떤 생각이 들었나요?"
+          placeholder="ì´ ì±ì ì½ê³  ì´ë¤ ìê°ì´ ë¤ìëì?"
           className={`${inputClass} min-h-[120px] resize-none`}
           required
         />
       </div>
 
-      {/* 추천 이유 */}
+      {/* ì¶ì² ì´ì  */}
       <div>
-        <label className={labelClass}>👍 추천 이유</label>
+        <label className={labelClass}>ð ì¶ì² ì´ì </label>
         <textarea
           value={recommendation}
           onChange={(e) => setRecommendation(e.target.value)}
-          placeholder="친구들에게 이 책을 추천하는 이유를 적어보세요."
+          placeholder="ì¹êµ¬ë¤ìê² ì´ ì±ì ì¶ì²íë ì´ì ë¥¼ ì ì´ë³´ì¸ì."
           className={`${inputClass} min-h-[80px] resize-none`}
         />
       </div>
 
-      {/* 제출 버튼 */}
+      {/* ìë¬ ë©ìì§ */}
+      {errorMessage && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center">
+          {errorMessage}
+        </div>
+      )}
+
+      {/* ì ì¶ ë²í¼ */}
       <button
         type="submit"
         disabled={submitting || disabled}
@@ -224,12 +237,12 @@ export default function LogForm({ initialData, onSubmit, isEdit = false, disable
         {submitting ? (
           <>
             <Loader2 className="w-5 h-5 animate-spin" />
-            저장 중...
+            ì ì¥ ì¤...
           </>
         ) : (
           <>
             <Save className="w-5 h-5" />
-            {isEdit ? '독서록 수정하기' : '독서록 저장하기'}
+            {isEdit ? 'ëìë¡ ìì íê¸°' : 'ëìë¡ ì ì¥íê¸°'}
           </>
         )}
       </button>
