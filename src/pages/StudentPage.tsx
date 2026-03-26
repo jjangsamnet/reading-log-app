@@ -197,7 +197,7 @@ export default function StudentPage() {
             {/* 참여 중인 반 */}
             {classes.length === 0 ? (
               <div className="text-center py-16">
-                <div className="text-5xl mb-4">📖</div>
+                <div className="mb-4 flex justify-center"><BookOpen className="w-12 h-12 text-indigo-300" /></div>
                 <p className="text-gray-500 mb-2">참여 중인 반이 없습니다.</p>
                 <p className="text-gray-400 text-sm">선생님이 알려준 반 코드를 입력하여 입장하세요!</p>
               </div>
