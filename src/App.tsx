@@ -29,7 +29,7 @@ function AppContent() {
     return () => unsubscribe();
   }, []);
 
-  if (loading) return <LoadingSpinner message="ì± ë¶ë¬ì¤ë ì¤..." />;
+  if (loading) return <LoadingSpinner message="앱 불러오는 중..." />;
 
   const HomeRedirect = () => {
     if (!user) return <Navigate to="/login" />;
@@ -62,4 +62,3 @@ export default function App() {
           </BrowserRouter>
         );
 }
-undefined
