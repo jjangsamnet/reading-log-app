@@ -96,15 +96,21 @@ export default function StudentPage() {
     setPendingClassData(null);
   };
 
+  const [teacherMsg, setTeacherMsg] = useState('');
+
   const handleRequestTeacher = async () => {
     if (!user) return;
     if (user.pendingTeacher) {
-      alert('이미 교사 권한을 요청했습니다. 관리자 승인을 기다려주세요.');
+      setTeacherMsg('이미 교사 권한을 요청했습니다. 관리자 승인을 기다려주세요.');
       return;
     }
-    await requestTeacherRole(user.uid);
-    setUser({ ...user, pendingTeacher: true });
-    alert('교사 권한을 요청했습니다. 관리자 승인 후 반을 만들 수 있습니다.');
+    try {
+      await requestTeacherRole(user.uid);
+      setUser({ ...user, pendingTeacher: true });
+      setTeacherMsg('교사 권한을 요청했습니다. 관리자 승인 후 반을 만들 수 있습니다.');
+    } catch (err) {
+      setTeacherMsg('교사 권한 요청에 실패했습니다.');
+    }
   };
 
   if (loading) return <><Header /><LoadingSpinner /></>;
@@ -122,7 +128,7 @@ export default function StudentPage() {
               showDashboard ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 border'
             }`}
           >
-            내 독섞 현황
+            내 독서 현황
           </button>
           <button
             onClick={() => setShowDashboard(false)}
@@ -132,6 +138,13 @@ export default function StudentPage() {
           >
             내 반 목록
           </button>
+
+          {/* 교사 권한 메시지 */}
+          {teacherMsg && (
+            <div className="ml-auto px-3 py-2 text-xs text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-lg">
+              {teacherMsg}
+            </div>
+          )}
 
           {/* 교사 권한 요청 */}
           {user.role === 'student' && (
@@ -145,7 +158,7 @@ export default function StudentPage() {
           )}
         </div>
 
-        {/* 내 독섞 현황 (대시보드) */}
+        {/* 내 독서 현황 (대시보드) */}
         {showDashboard && (
           <StudentDashboard studentId={user.uid} studentName={user.displayName} />
         )}
