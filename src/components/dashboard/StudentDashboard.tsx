@@ -208,7 +208,7 @@ export default function StudentDashboard({ studentId, studentName }: StudentDash
       {/* 최근 독서록 */}
       {logs.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200 p-5">
-          <h3 className="font-bold text-gray-700 mb-4">📖 최근 독서록</h3>
+          <h3 className="font-bold text-gray-700 mb-4">최근 독서록</h3>
           <div className="space-y-3">
             {logs.slice(0, 5).map((log) => (
               <div key={log.logId} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg">
