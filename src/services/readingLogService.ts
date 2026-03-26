@@ -44,19 +44,17 @@ export async function createReadingLog(
     favoriteQuote: input.favoriteQuote || '',
     thoughts: input.thoughts,
     recommendation: input.recommendation || '',
+    logType: input.logType || 'text',
+    photoImages: input.photoImages || [],
     createdAt: now,
     updatedAt: now,
   };
 
   await setDoc(logRef, logData);
-
-  // 반의 학생 logCount 업데이트
   await updateStudentLogCount(classId, studentId);
-
   return logRef.id;
 }
 
-// 독서록 수정
 export async function updateReadingLog(
   logId: string,
   updates: Partial<ReadingLogInput>
@@ -68,16 +66,12 @@ export async function updateReadingLog(
   });
 }
 
-// 독서록 삭제
 export async function deleteReadingLog(logId: string, classId: string, studentId: string): Promise<void> {
   const logRef = doc(db, 'readingLogs', logId);
   await deleteDoc(logRef);
-
-  // logCount 업데이트
   await updateStudentLogCount(classId, studentId);
 }
 
-// 학생별 독서록 목록 조회
 export async function getStudentLogs(
   studentId: string,
   classId: string
@@ -92,7 +86,6 @@ export async function getStudentLogs(
   return snapshot.docs.map((doc) => doc.data() as ReadingLog);
 }
 
-// 학생별 전체 독서록 (모든 반)
 export async function getAllStudentLogs(studentId: string): Promise<ReadingLog[]> {
   const q = query(
     collection(db, 'readingLogs'),
@@ -103,7 +96,6 @@ export async function getAllStudentLogs(studentId: string): Promise<ReadingLog[]
   return snapshot.docs.map((doc) => doc.data() as ReadingLog);
 }
 
-// 반 전체 독서록 조회 (교사용)
 export async function getClassLogs(classId: string): Promise<ReadingLog[]> {
   const q = query(
     collection(db, 'readingLogs'),
@@ -114,7 +106,6 @@ export async function getClassLogs(classId: string): Promise<ReadingLog[]> {
   return snapshot.docs.map((doc) => doc.data() as ReadingLog);
 }
 
-// 독서록 상세 조회
 export async function getLogDetail(logId: string): Promise<ReadingLog | null> {
   const logRef = doc(db, 'readingLogs', logId);
   const logSnap = await getDoc(logRef);
@@ -122,7 +113,6 @@ export async function getLogDetail(logId: string): Promise<ReadingLog | null> {
   return logSnap.data() as ReadingLog;
 }
 
-// 실시간 구독
 export function subscribeToStudentLogs(
   studentId: string,
   classId: string,
@@ -134,14 +124,12 @@ export function subscribeToStudentLogs(
     where('classId', '==', classId),
     orderBy('createdAt', 'desc')
   );
-
   return onSnapshot(q, (snapshot) => {
     const logs = snapshot.docs.map((doc) => doc.data() as ReadingLog);
     callback(logs);
   });
 }
 
-// 표지 이미지 업로드
 export async function uploadCoverImage(
   file: File,
   studentId: string
@@ -149,14 +137,27 @@ export async function uploadCoverImage(
   const ext = file.name.split('.').pop();
   const fileName = `covers/${studentId}/${Date.now()}.${ext}`;
   const storageRef = ref(storage, fileName);
-
   await uploadBytes(storageRef, file);
   return getDownloadURL(storageRef);
 }
 
-// 학생 logCount 업데이트 (내부 함수)
+export async function uploadLogPhotos(
+  files: File[],
+  studentId: string
+): Promise<string[]> {
+  const urls: string[] = [];
+  for (const file of files) {
+    const ext = file.name.split('.').pop();
+    const fileName = `log-photos/${studentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const storageRef = ref(storage, fileName);
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+    urls.push(url);
+  }
+  return urls;
+}
+
 async function updateStudentLogCount(classId: string, studentId: string) {
-  // 해당 학생의 독서록 수 카운트
   const q = query(
     collection(db, 'readingLogs'),
     where('studentId', '==', studentId),
@@ -164,16 +165,12 @@ async function updateStudentLogCount(classId: string, studentId: string) {
   );
   const snapshot = await getDocs(q);
   const count = snapshot.size;
-
-  // 반 데이터에서 학생의 logCount 업데이트
   const classRef = doc(db, 'classes', classId);
   const classSnap = await getDoc(classRef);
   if (!classSnap.exists()) return;
-
   const classData = classSnap.data();
   const updatedStudents = classData.students.map((s: any) =>
     s.uid === studentId ? { ...s, logCount: count } : s
   );
-
   await updateDoc(classRef, { students: updatedStudents });
 }
