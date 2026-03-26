@@ -29,14 +29,19 @@ export default function StudentBoardPage() {
     if (!classId || !studentId) return;
     setLoading(true);
     try {
-      const [cls, studentLogs] = await Promise.all([
-        getClassData(classId),
-        getStudentLogs(studentId, classId),
-      ]);
+      // classData와 logs를 독립적으로 로드하여 하나가 실패해도 나머지는 정상 작동
+      const cls = await getClassData(classId);
       setClassData(cls);
-      setLogs(studentLogs);
+
+      try {
+        const studentLogs = await getStudentLogs(studentId, classId);
+        setLogs(studentLogs);
+      } catch (logErr) {
+        console.error('독서록 로드 실패:', logErr);
+        setLogs([]);
+      }
     } catch (err) {
-      console.error('데이터 로드 실패:', err);
+      console.error('반 데이터 로드 실패:', err);
     } finally {
       setLoading(false);
     }
