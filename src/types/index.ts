@@ -56,6 +56,8 @@ export interface ReadingLog {
   favoriteQuote: string;
   thoughts: string;
   recommendation: string;
+  logType: 'text' | 'photo'; // 'text': 웹 작성, 'photo': 사진 업로드
+  photoImages: string[]; // 사진 업로드 시 이미지 URLs
   createdAt: number;
   updatedAt: number;
 }
@@ -71,6 +73,8 @@ export interface ReadingLogInput {
   favoriteQuote?: string;
   thoughts: string;
   recommendation?: string;
+  logType?: 'text' | 'photo';
+  photoImages?: string[];
 }
 
 // 보석 등급 시스템 (10단계)
