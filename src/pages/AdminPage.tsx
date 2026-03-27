@@ -21,17 +21,17 @@ export default function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      // êµì¬ ê¶í ìì²­ ì¤ì¸ ì¬ì©ì
+      // 교사 권한 요청 중인 사용자
       const pendingQ = query(collection(db, 'users'), where('pendingTeacher', '==', true));
       const pendingSnap = await getDocs(pendingQ);
       setPendingTeachers(pendingSnap.docs.map((d) => d.data() as UserProfile));
 
-      // íì¬ êµì¬ ëª©ë¡
+      // 현재 교사 목록
       const teacherQ = query(collection(db, 'users'), where('role', '==', 'teacher'));
       const teacherSnap = await getDocs(teacherQ);
       setAllTeachers(teacherSnap.docs.map((d) => d.data() as UserProfile));
 
-      // íµê³
+      // 통계
       const classSnap = await getDocs(collection(db, 'classes'));
       const userSnap = await getDocs(collection(db, 'users'));
       const logSnap = await getDocs(collection(db, 'readingLogs'));
@@ -43,7 +43,7 @@ export default function AdminPage() {
         logs: logSnap.size,
       });
     } catch (err) {
-      console.error('ê´ë¦¬ì ë°ì´í° ë¡ë ì¤í¨:', err);
+      console.error('관리자 데이터 로드 실패:', err);
     } finally {
       setLoading(false);
     }
@@ -53,11 +53,11 @@ export default function AdminPage() {
     try {
       setMessage(null);
       await approveTeacherRole(uid);
-      setMessage({ type: 'success', text: 'êµì¬ ê¶íì´ ì¹ì¸ëììµëë¤.' });
+      setMessage({ type: 'success', text: '교사 권한이 승인되었습니다.' });
       loadData();
     } catch (err) {
-      console.error('êµì¬ ì¹ì¸ ì¤í¨:', err);
-      setMessage({ type: 'error', text: 'ì¹ì¸ ì²ë¦¬ì ì¤í¨íìµëë¤.' });
+      console.error('교사 승인 실패:', err);
+      setMessage({ type: 'error', text: '승인 처리에 실패했습니다.' });
     }
   };
 
@@ -65,11 +65,11 @@ export default function AdminPage() {
     try {
       setMessage(null);
       await rejectTeacherRole(uid);
-      setMessage({ type: 'success', text: 'êµì¬ ìì²­ì´ ê±°ì ëììµëë¤.' });
+      setMessage({ type: 'success', text: '교사 요청이 거절되었습니다.' });
       loadData();
     } catch (err) {
-      console.error('êµì¬ ê±°ì  ì¤í¨:', err);
-      setMessage({ type: 'error', text: 'ê±°ì  ì²ë¦¬ì ì¤í¨íìµëë¤.' });
+      console.error('교사 거절 실패:', err);
+      setMessage({ type: 'error', text: '거절 처리에 실패했습니다.' });
     }
   };
 
@@ -81,7 +81,7 @@ export default function AdminPage() {
       <div className="max-w-5xl mx-auto p-6">
         <div className="flex items-center gap-3 mb-6">
           <Shield className="w-7 h-7 text-red-500" />
-          <h1 className="text-2xl font-bold text-gray-800">ê´ë¦¬ì í¨ë</h1>
+          <h1 className="text-2xl font-bold text-gray-800">관리자 패널</h1>
         </div>
 
         {message && (
@@ -92,37 +92,37 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* íµê³ ì¹´ë */}
+        {/* 통계 카드 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-xl border p-4 text-center">
             <Users className="w-6 h-6 text-blue-500 mx-auto mb-2" />
             <div className="text-2xl font-bold text-gray-800">{stats.teachers}</div>
-            <p className="text-xs text-gray-400">êµì¬</p>
+            <p className="text-xs text-gray-400">교사</p>
           </div>
           <div className="bg-white rounded-xl border p-4 text-center">
             <School className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
             <div className="text-2xl font-bold text-gray-800">{stats.classes}</div>
-            <p className="text-xs text-gray-400">ë°</p>
+            <p className="text-xs text-gray-400">반</p>
           </div>
           <div className="bg-white rounded-xl border p-4 text-center">
             <Users className="w-6 h-6 text-purple-500 mx-auto mb-2" />
             <div className="text-2xl font-bold text-gray-800">{stats.students}</div>
-            <p className="text-xs text-gray-400">íì</p>
+            <p className="text-xs text-gray-400">학생</p>
           </div>
           <div className="bg-white rounded-xl border p-4 text-center">
             <BookOpen className="w-6 h-6 text-amber-500 mx-auto mb-2" />
             <div className="text-2xl font-bold text-gray-800">{stats.logs}</div>
-            <p className="text-xs text-gray-400">ëìë¡</p>
+            <p className="text-xs text-gray-400">독서록</p>
           </div>
         </div>
 
-        {/* êµì¬ ê¶í ìì²­ */}
+        {/* 교사 권한 요청 */}
         <div className="bg-white rounded-xl border mb-6">
           <div className="p-5 border-b">
-            <h2 className="font-bold text-gray-700">êµì¬ ê¶í ìì²­ ({pendingTeachers.length})</h2>
+            <h2 className="font-bold text-gray-700">교사 권한 요청 ({pendingTeachers.length})</h2>
           </div>
           {pendingTeachers.length === 0 ? (
-            <div className="p-8 text-center text-gray-400 text-sm">ëê¸° ì¤ì¸ ìì²­ì´ ììµëë¤.</div>
+            <div className="p-8 text-center text-gray-400 text-sm">대기 중인 요청이 없습니다.</div>
           ) : (
             <div className="divide-y">
               {pendingTeachers.map((teacher) => (
@@ -145,13 +145,13 @@ export default function AdminPage() {
                       onClick={() => handleApprove(teacher.uid)}
                       className="flex items-center gap-1 px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600"
                     >
-                      <Check className="w-4 h-4" /> ì¹ì¸
+                      <Check className="w-4 h-4" /> 승인
                     </button>
                     <button
                       onClick={() => handleReject(teacher.uid)}
                       className="flex items-center gap-1 px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600"
                     >
-                      <X className="w-4 h-4" /> ê±°ì 
+                      <X className="w-4 h-4" /> 거절
                     </button>
                   </div>
                 </div>
@@ -160,10 +160,10 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* íì¬ êµì¬ ëª©ë¡ */}
+        {/* 현재 교사 목록 */}
         <div className="bg-white rounded-xl border">
           <div className="p-5 border-b">
-            <h2 className="font-bold text-gray-700">ë±ë¡ë êµì¬ ({allTeachers.length})</h2>
+            <h2 className="font-bold text-gray-700">등록된 교사 ({allTeachers.length})</h2>
           </div>
           <div className="divide-y">
             {allTeachers.map((teacher) => (
@@ -180,7 +180,7 @@ export default function AdminPage() {
                   <p className="text-xs text-gray-400">{teacher.email}</p>
                 </div>
                 <span className="ml-auto text-xs text-gray-400">
-                  ë° {teacher.classIds?.length || 0}ê°
+                  반 {teacher.classIds?.length || 0}개
                 </span>
               </div>
             ))}

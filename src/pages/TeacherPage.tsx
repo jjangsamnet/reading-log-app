@@ -40,7 +40,7 @@ export default function TeacherPage() {
       setShowCreate(false);
       loadClasses();
     } catch (err) {
-      setErrorMsg('ë° ìì±ì ì¤í¨íìµëë¤. ë¤ì ìëí´ì£¼ì¸ì.');
+      setErrorMsg('반 생성에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setCreating(false);
     }
@@ -58,52 +58,52 @@ export default function TeacherPage() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="max-w-5xl mx-auto p-6">
-        {/* ìë¨ */}
+        {/* 상단 */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">ë´ êµì¤</h1>
+          <h1 className="text-2xl font-bold text-gray-800">내 교실</h1>
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold text-sm
               hover:bg-indigo-700 transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            ì ë° ë§ë¤ê¸°
+            새 반 만들기
           </button>
         </div>
 
-        {/* ìë¬ ë©ìì§ */}
+        {/* 에러 메시지 */}
         {errorMsg && (
           <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm text-center mb-4">
             {errorMsg}
           </div>
         )}
 
-        {/* ë° ìì± ëª¨ë¬ */}
+        {/* 반 생성 모달 */}
         {showCreate && (
           <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">ì ë° ë§ë¤ê¸°</h2>
+              <h2 className="text-lg font-bold text-gray-800 mb-4">새 반 만들기</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-1">ë° ì´ë¦</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-1">반 이름</label>
                   <input
                     type="text"
                     value={newClassName}
                     onChange={(e) => setNewClassName(e.target.value)}
-                    placeholder="ì: 6íë 2ë° ëìêµì¤"
+                    placeholder="예: 6학년 2반 독서교실"
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-600 mb-1">ìµë ì¸ì</label>
+                  <label className="block text-sm font-semibold text-gray-600 mb-1">최대 인원</label>
                   <select
                     value={maxStudents}
                     onChange={(e) => setMaxStudents(Number(e.target.value))}
                     className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-400 outline-none"
                   >
-                    <option value={25}>25ëª (5Ã5)</option>
-                    <option value={30}>30ëª (5Ã6)</option>
-                    <option value={35}>35ëª (5Ã7)</option>
+                    <option value={25}>25명 (5×5)</option>
+                    <option value={30}>30명 (5×6)</option>
+                    <option value={35}>35명 (5×7)</option>
                   </select>
                 </div>
               </div>
@@ -112,26 +112,26 @@ export default function TeacherPage() {
                   onClick={() => setShowCreate(false)}
                   className="flex-1 py-3 border rounded-xl text-gray-600 hover:bg-gray-50"
                 >
-                  ì·¨ì
+                  취소
                 </button>
                 <button
                   onClick={handleCreate}
                   disabled={creating || !newClassName.trim()}
                   className="flex-1 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 disabled:bg-gray-300"
                 >
-                  {creating ? 'ìì± ì¤...' : 'ë§ë¤ê¸°'}
+                  {creating ? '생성 중...' : '만들기'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* ë° ëª©ë¡ */}
+        {/* 반 목록 */}
         {classes.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">ð</div>
-            <p className="text-gray-500 mb-2">ìì§ ë§ë  ë°ì´ ììµëë¤.</p>
-            <p className="text-gray-400 text-sm">"ì ë° ë§ë¤ê¸°" ë²í¼ì ëë¬ ììíì¸ì!</p>
+            <div className="text-5xl mb-4">📚</div>
+            <p className="text-gray-500 mb-2">아직 만든 반이 없습니다.</p>
+            <p className="text-gray-400 text-sm">"새 반 만들기" 버튼을 눌러 시작하세요!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -148,9 +148,9 @@ export default function TeacherPage() {
                   </span>
                 </div>
 
-                {/* ë° ì½ë */}
+                {/* 반 코드 */}
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-xs text-gray-400">ë° ì½ë:</span>
+                  <span className="text-xs text-gray-400">반 코드:</span>
                   <code className="text-sm font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
                     {cls.inviteCode}
                   </code>
@@ -160,7 +160,7 @@ export default function TeacherPage() {
                       copyCode(cls.inviteCode);
                     }}
                     className="text-gray-400 hover:text-indigo-600"
-                    title="ë³µì¬"
+                    title="복사"
                   >
                     {copiedCode === cls.inviteCode ? (
                       <Check className="w-4 h-4 text-emerald-500" />
@@ -173,11 +173,11 @@ export default function TeacherPage() {
                 <div className="flex gap-4 text-sm text-gray-500">
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {cls.students.length}/{cls.maxStudents}ëª
+                    {cls.students.length}/{cls.maxStudents}명
                   </span>
                   <span className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    {cls.students.reduce((acc, s) => acc + s.logCount, 0)}í¸
+                    {cls.students.reduce((acc, s) => acc + s.logCount, 0)}편
                   </span>
                 </div>
               </div>
