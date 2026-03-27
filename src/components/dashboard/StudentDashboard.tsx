@@ -130,7 +130,7 @@ export default function StudentDashboard({ studentId, studentName }: StudentDash
           </div>
         ) : (
           <div className="text-lg font-bold text-indigo-600">
-            🎉 최고 등급 달성! 대단해요!
+            최고 등급 달성! 대단해요!
           </div>
         )}
       </div>

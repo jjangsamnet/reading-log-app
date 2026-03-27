@@ -45,7 +45,7 @@ export default function GemBadge({ logCount, showProgress = false, size = 'md' }
       )}
 
       {showProgress && !nextLevel && (
-        <p className="text-xs text-indigo-600 font-semibold">최고 등급 달성! 🎉</p>
+        <p className="text-xs text-indigo-600 font-semibold">최고 등급 달성!</p>
       )}
 
       {showProgress && (
